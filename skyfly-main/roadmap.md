@@ -1,0 +1,3 @@
+- [ ] Compare the uploaded ZIP with the current project
+- [ ] Apply only verified source fixes while preserving secrets, design, and database state
+- [ ] Run validation and build without publishing

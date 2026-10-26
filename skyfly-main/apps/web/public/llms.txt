@@ -1,0 +1,9 @@
+# EduVault AI
+
+> AI-powered Student Super Platform: secure document vault, 24/7 AI tutor,
+> LinkedIn-style student network, and learning modules for School, College,
+> JEE, NEET, coding, and aptitude.
+
+## Pages
+- [Home](/): overview, features, and getting started
+- [Sign in / Sign up](/auth): create a student account
