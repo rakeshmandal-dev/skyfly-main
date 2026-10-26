@@ -1,7 +1,13 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "vite",
-  "buildCommand": "npm run build:web",
-  "outputDirectory": "apps/web/dist",
-  "installCommand": "npm install"
+  "version": 2,
+  "builds": [
+    {
+      "src": "apps/web/package.json",
+      "use": "@vercel/next"
+    },
+    {
+      "src": "api/package.json",
+      "use": "@vercel/node"
+    }
+  ]
 }
