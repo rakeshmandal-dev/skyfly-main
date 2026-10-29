@@ -114,13 +114,13 @@ export type HologramElement = UniversalHologramElement;
 export interface UniversalHologramScene {
   step: number;
   totalSteps: number;
-  title: string;
-  speech: string;
-  elements: UniversalHologramElement[];
+  title?: string;
+  speech?: string;
+  elements?: UniversalHologramElement[];
   // Backwards compatibility aliases with older UI callers
-  spokenText: string;
-  heading: string;
-  keyPoints: string[];
+  spokenText?: string;
+  heading?: string;
+  keyPoints?: string[];
   formula?: string;
   diagramType?: HologramModelType;
   diagramLabel?: string;

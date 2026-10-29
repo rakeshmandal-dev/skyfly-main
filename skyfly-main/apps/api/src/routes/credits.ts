@@ -1,18 +1,14 @@
 import { Router } from "express";
 import { requireAuth, type AuthenticatedRequest } from "../middleware/auth.js";
 import { CreditAwardSchema, CreditSpendSchema } from "@eduvault/shared";
-import { createClient } from "@supabase/supabase-js";
-import { env } from "../config/env.js";
+import { getUserClient } from "../config/supabase.js";
 
 export const creditsRouter = Router();
-
-const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_PUBLISHABLE_KEY, {
-  auth: { persistSession: false },
-});
 
 // GET /api/credits
 creditsRouter.get("/credits", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
+    const supabase = getUserClient(req.token);
     const [walletRes, ledgerRes, eligRes] = await Promise.all([
       supabase.from("credit_wallets").select("*").eq("user_id", req.userId!).maybeSingle(),
       supabase.from("credit_ledger").select("*").eq("user_id", req.userId!).order("created_at", { ascending: false }).limit(20),
@@ -35,6 +31,7 @@ creditsRouter.get("/credits", requireAuth, async (req: AuthenticatedRequest, res
 creditsRouter.post("/credits/award", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
     const body = CreditAwardSchema.parse(req.body);
+    const supabase = getUserClient(req.token);
     const { data, error } = await supabase.rpc("award_learning_credits", {
       _activity: body.activity,
       _ref_key: body.refKey || null,
@@ -52,6 +49,7 @@ creditsRouter.post("/credits/award", requireAuth, async (req: AuthenticatedReque
 creditsRouter.post("/credits/spend", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
     const body = CreditSpendSchema.parse(req.body);
+    const supabase = getUserClient(req.token);
     const { data, error } = await supabase.rpc("spend_learning_credits", {
       _amount: body.amount,
       _purpose: body.purpose,

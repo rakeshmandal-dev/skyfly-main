@@ -10,6 +10,7 @@ export interface AuthenticatedRequest extends Request {
   user?: User;
   userId?: string;
   userRole?: "student" | "admin";
+  token?: string;
 }
 
 export async function requireAuth(req: AuthenticatedRequest, res: Response, next: NextFunction) {
@@ -40,7 +41,35 @@ export async function requireAuth(req: AuthenticatedRequest, res: Response, next
 
     req.user = data.user;
     req.userId = data.user.id;
-    req.userRole = (data.user.user_metadata?.role as "student" | "admin") || "student";
+    req.token = token;
+
+    // Secure server-managed role resolution:
+    // 1. Check server-protected app_metadata (cannot be tampered with by clients)
+    // 2. Check service-role / database permissions
+    // Do NOT rely on untrusted client-supplied user_metadata for admin authorization
+    const appRole = (data.user.app_metadata?.role as "student" | "admin") ||
+      (Array.isArray(data.user.app_metadata?.roles) && data.user.app_metadata.roles.includes("admin") ? "admin" : undefined);
+
+    let resolvedRole: "student" | "admin" = appRole || "student";
+
+    if (resolvedRole !== "admin" && env.SUPABASE_SERVICE_ROLE_KEY) {
+      try {
+        const { data: roleRow } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", data.user.id)
+          .eq("role", "admin")
+          .maybeSingle();
+
+        if (roleRow?.role === "admin") {
+          resolvedRole = "admin";
+        }
+      } catch {
+        // Fallback to student if role query fails
+      }
+    }
+
+    req.userRole = resolvedRole;
     next();
   } catch (err) {
     return res.status(500).json({
