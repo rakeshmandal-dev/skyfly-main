@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
-import helmet from "helmet";
+import * as helmetPkg from "helmet";
+const helmet: any = (helmetPkg as any).default ?? helmetPkg;
 import { env } from "./config/env.js";
 import { requestIdMiddleware, errorHandler } from "./middleware/error-handler.js";
 import { standardRateLimiter } from "./middleware/rate-limit.js";
