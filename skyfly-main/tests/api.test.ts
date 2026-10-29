@@ -77,4 +77,15 @@ test("API Endpoints Integration Suite", async (t) => {
     const res = await fetch(`${baseUrl}/api/credits`);
     assert.equal(res.status, 401);
   });
+
+  await t.test("CORS enforces trusted origin and allows credentials", async () => {
+    const res = await fetch(`${baseUrl}/api/health`, {
+      headers: {
+        Origin: "http://localhost:5173",
+      },
+    });
+    assert.equal(res.status, 200);
+    assert.equal(res.headers.get("access-control-allow-origin"), "http://localhost:5173");
+    assert.equal(res.headers.get("access-control-allow-credentials"), "true");
+  });
 });

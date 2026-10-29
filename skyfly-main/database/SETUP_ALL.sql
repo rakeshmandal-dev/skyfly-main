@@ -243,6 +243,7 @@ BEGIN
 END;
 $$;
 
+
 -- Function 2: Toggle Raise Hand
 CREATE OR REPLACE FUNCTION public.toggle_classroom_raise_hand(
   p_room_id TEXT,
@@ -267,6 +268,7 @@ BEGIN
   );
 END;
 $$;
+
 
 -- Function 3: Select Speaking Student (Teacher / Host controls)
 CREATE OR REPLACE FUNCTION public.select_speaking_student(
@@ -299,6 +301,7 @@ BEGIN
 END;
 $$;
 
+
 -- Function 4: Leave Classroom Seat
 CREATE OR REPLACE FUNCTION public.leave_classroom_seat(
   p_room_id TEXT,
@@ -322,6 +325,7 @@ BEGIN
 END;
 $$;
 
+
 -- Function 5: Periodic cleanup of stale offline sessions (heartbeat older than 5 mins)
 CREATE OR REPLACE FUNCTION public.cleanup_stale_classroom_participants()
 RETURNS INT
@@ -338,6 +342,7 @@ BEGIN
   RETURN v_deleted;
 END;
 $$;
+
 
 -- ============================================================================
 -- Enable Supabase Realtime for Tables
@@ -369,3 +374,9 @@ EXCEPTION
     NULL;
 END;
 $$;
+
+-- Security & Storage Enhancements
+GRANT EXECUTE ON FUNCTION public.increment_post_likes(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.decrement_post_likes(UUID) TO authenticated;
+
+

@@ -21,6 +21,7 @@ import {
   CheckCircle2,
   Eye,
   Layers,
+  HardDrive,
 } from "lucide-react";
 import { ClassroomStage } from "@/components/Classroom3D/ClassroomStage";
 import { useQuery } from "@tanstack/react-query";

@@ -1,19 +1,15 @@
 import { Router } from "express";
 import { requireAuth, type AuthenticatedRequest } from "../middleware/auth.js";
 import { NoteCreateSchema, NoteFilterSchema, SEED_NOTES } from "@eduvault/shared";
-import { createClient } from "@supabase/supabase-js";
-import { env } from "../config/env.js";
+import { getUserClient, getServiceClient } from "../config/supabase.js";
 
 export const notesRouter = Router();
-
-const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_PUBLISHABLE_KEY, {
-  auth: { persistSession: false },
-});
 
 // GET /api/notes
 notesRouter.get("/notes", async (req, res) => {
   try {
     const filters = NoteFilterSchema.parse(req.query);
+    const supabase = getServiceClient();
 
     let query = supabase
       .from("study_materials")
@@ -59,6 +55,7 @@ notesRouter.get("/notes", async (req, res) => {
 notesRouter.post("/notes", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
     const body = NoteCreateSchema.parse(req.body);
+    const supabase = getUserClient(req.token);
     const { data, error } = await supabase
       .from("study_materials")
       .insert({
@@ -85,6 +82,7 @@ notesRouter.post("/notes", requireAuth, async (req: AuthenticatedRequest, res) =
 notesRouter.delete("/notes/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
+    const supabase = getUserClient(req.token);
     const { error } = await supabase
       .from("study_materials")
       .delete()
