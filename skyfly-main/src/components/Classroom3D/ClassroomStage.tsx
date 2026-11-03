@@ -466,28 +466,32 @@ export function ClassroomStage({
         return;
       }
 
+      const segHeading = targetSeg.title || targetSeg.heading || "Key Concept";
+      const segSpeech = targetSeg.speech || targetSeg.spokenText || "";
+      const segKeyPoints = targetSeg.keyPoints || (targetSeg.elements?.flatMap((e) => e.steps || e.keywords || []) ?? ["Key takeaway"]);
+
       setCurrentSegmentIndex(segIndex);
       setSpeaking(true);
-      setStatusMessage(`Step ${targetSeg.step}/${targetSeg.totalSteps}: ${targetSeg.heading}`);
+      setStatusMessage(`Step ${targetSeg.step}/${targetSeg.totalSteps}: ${segHeading}`);
 
       // Update blackboard with active segment details
       setCurrentTopic((prev) => ({
         ...prev,
-        boardHeading: targetSeg.heading.toUpperCase(),
+        boardHeading: segHeading.toUpperCase(),
         boardFormulas: targetSeg.formula
           ? [targetSeg.formula, ...(prev.boardFormulas.slice(0, 2))]
           : prev.boardFormulas,
-        boardNotes: targetSeg.keyPoints,
+        boardNotes: segKeyPoints,
       }));
 
       // Speak in Hindi if query/segment is Hindi, else English
       const speechLangCode =
-        lang === "hi" || voiceLang === "hi-IN" || /[\u0900-\u097F]/.test(targetSeg.spokenText)
+        lang === "hi" || voiceLang === "hi-IN" || /[\u0900-\u097F]/.test(segSpeech)
           ? "hi-IN"
           : "en-IN";
 
-      if (!audioMuted && speech.supported) {
-        speech.speak(targetSeg.spokenText, speechLangCode, () => {
+      if (!audioMuted && speech.supported && segSpeech) {
+        speech.speak(segSpeech, speechLangCode, () => {
           if (segIndex + 1 < segList.length) {
             setTimeout(() => {
               playSegment(segIndex + 1, segList, lang);

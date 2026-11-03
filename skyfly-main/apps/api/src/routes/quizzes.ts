@@ -1,14 +1,9 @@
 import { Router } from "express";
 import { requireAuth, type AuthenticatedRequest } from "../middleware/auth.js";
 import { QuizAttemptCreateSchema, QUIZZES } from "@eduvault/shared";
-import { createClient } from "@supabase/supabase-js";
-import { env } from "../config/env.js";
+import { getUserClient } from "../config/supabase.js";
 
 export const quizzesRouter = Router();
-
-const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_PUBLISHABLE_KEY, {
-  auth: { persistSession: false },
-});
 
 // GET /api/quizzes
 quizzesRouter.get("/quizzes", (req, res) => {
@@ -24,6 +19,7 @@ quizzesRouter.post("/quizzes/:id/attempts", requireAuth, async (req: Authenticat
   try {
     const { id } = req.params;
     const body = QuizAttemptCreateSchema.parse(req.body);
+    const supabase = getUserClient(req.token);
 
     const { data: attempt, error } = await supabase
       .from("quiz_attempts")

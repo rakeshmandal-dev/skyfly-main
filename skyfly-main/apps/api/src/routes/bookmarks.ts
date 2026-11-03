@@ -1,17 +1,13 @@
 import { Router } from "express";
 import { requireAuth, type AuthenticatedRequest } from "../middleware/auth.js";
 import { BookmarkCreateSchema } from "@eduvault/shared";
-import { createClient } from "@supabase/supabase-js";
-import { env } from "../config/env.js";
+import { getUserClient } from "../config/supabase.js";
 
 export const bookmarksRouter = Router();
 
-const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_PUBLISHABLE_KEY, {
-  auth: { persistSession: false },
-});
-
 bookmarksRouter.get("/bookmarks", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
+    const supabase = getUserClient(req.token);
     const { data, error } = await supabase
       .from("bookmarks")
       .select("*")
@@ -28,6 +24,7 @@ bookmarksRouter.get("/bookmarks", requireAuth, async (req: AuthenticatedRequest,
 bookmarksRouter.post("/bookmarks", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
     const body = BookmarkCreateSchema.parse(req.body);
+    const supabase = getUserClient(req.token);
     const { data, error } = await supabase
       .from("bookmarks")
       .upsert(
@@ -47,6 +44,7 @@ bookmarksRouter.post("/bookmarks", requireAuth, async (req: AuthenticatedRequest
 bookmarksRouter.delete("/bookmarks/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
+    const supabase = getUserClient(req.token);
     const { error } = await supabase
       .from("bookmarks")
       .delete()

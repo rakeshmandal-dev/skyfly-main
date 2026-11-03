@@ -228,8 +228,8 @@ export function ClassroomEnvironment() {
       {/* Functional Real-Time Analog Wall Clock on Right Wall */}
       <group position={[8.92, 4.6, 0]} rotation={[0, -Math.PI / 2, 0]}>
         {/* Clock Frame */}
-        <mesh castShadow>
-          <cylinderGeometry args={[0.42, 0.42, 0.06, 32]} rotation={[Math.PI / 2, 0, 0]} />
+        <mesh castShadow rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.42, 0.42, 0.06, 32]} />
           <meshStandardMaterial color="#334155" metalness={0.7} roughness={0.3} />
         </mesh>
         {/* Clock Face White Dial */}

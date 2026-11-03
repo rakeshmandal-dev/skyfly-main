@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
-import helmet from "helmet";
+import * as helmetPkg from "helmet";
+const helmet: any = (helmetPkg as any).default ?? helmetPkg;
 import { env } from "./config/env.js";
 import { requestIdMiddleware, errorHandler } from "./middleware/error-handler.js";
 import { standardRateLimiter } from "./middleware/rate-limit.js";
@@ -35,13 +36,55 @@ export const app = express();
 
 // Security & baseline middleware
 app.use(helmet());
-const corsOrigin =
-  env.CORS_ORIGIN === "*"
-    ? true
-    : env.CORS_ORIGIN.includes(",")
-      ? env.CORS_ORIGIN.split(",").map((s) => s.trim())
-      : env.CORS_ORIGIN;
-app.use(cors({ origin: corsOrigin, credentials: true }));
+
+const defaultTrustedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:8080",
+  "http://localhost:3000",
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:8080",
+  "http://127.0.0.1:3000",
+];
+
+const configuredOrigins =
+  env.CORS_ORIGIN && env.CORS_ORIGIN !== "*"
+    ? env.CORS_ORIGIN.split(",").map((s) => s.trim().replace(/\/$/, ""))
+    : [];
+
+const trustedOrigins = Array.from(new Set([...defaultTrustedOrigins, ...configuredOrigins]));
+
+app.use(
+  cors({
+    origin: (requestOrigin, callback) => {
+      // Allow requests with no origin (e.g. mobile apps, same-origin, curl, server-to-server)
+      if (!requestOrigin) {
+        return callback(null, true);
+      }
+
+      const normalizedOrigin = requestOrigin.replace(/\/$/, "");
+
+      if (trustedOrigins.includes(normalizedOrigin)) {
+        return callback(null, true);
+      }
+
+      // In non-production or test, allow wildcards or local loopback patterns
+      if (
+        env.NODE_ENV !== "production" &&
+        (env.CORS_ORIGIN === "*" ||
+          /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(normalizedOrigin))
+      ) {
+        return callback(null, true);
+      }
+
+      return callback(
+        new Error(`CORS blocked: Origin ${requestOrigin} is not in the trusted origins list.`)
+      );
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "X-Request-ID"],
+  })
+);
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(requestIdMiddleware);

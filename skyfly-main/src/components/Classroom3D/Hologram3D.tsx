@@ -205,8 +205,8 @@ export function Hologram3D({ segment, active, speaking }: Hologram3DProps) {
 // Sub-Renderer for the 9 Hologram Element Types
 function renderElementContent(
   el: UniversalHologramElement,
-  model3DGroup: React.RefObject<THREE.Group>,
-  globeGroup: React.RefObject<THREE.Group>
+  model3DGroup: React.RefObject<THREE.Group | null>,
+  globeGroup: React.RefObject<THREE.Group | null>
 ) {
   switch (el.type) {
     // 1. 3D SHAPE / GEOMETRY
@@ -659,8 +659,8 @@ function render3DShapeGeometry(shape: UniversalShape3DType, customColor?: string
         <group>
           {[-0.2, -0.13, -0.06, 0, 0.06, 0.13, 0.2].map((y, i) => (
             <group key={i} position={[0, y, 0]} rotation={[0, i * 0.6, 0]}>
-              <mesh>
-                <cylinderGeometry args={[0.006, 0.006, 0.32, 6]} rotation={[0, 0, Math.PI / 2]} />
+              <mesh rotation={[0, 0, Math.PI / 2]}>
+                <cylinderGeometry args={[0.006, 0.006, 0.32, 6]} />
                 <meshStandardMaterial color={amber} emissive={amber} emissiveIntensity={1.2} />
               </mesh>
               <mesh position={[-0.16, 0, 0]}>

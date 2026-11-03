@@ -12,6 +12,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AccessibilityToolbar } from "@/components/AccessibilityToolbar";
+import { AccessAgent } from "@/components/AccessAgent";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -249,6 +250,7 @@ function AuthedLayout() {
           <Outlet />
         </main>
       </div>
+      <AccessAgent userId={user.id} />
     </div>
   );
 }

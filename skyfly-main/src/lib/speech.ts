@@ -9,7 +9,7 @@ export type SpeechState = {
   spokenText: string;
   /** How well the last spoken language matched an installed browser voice. */
   voiceMatch: (VoiceMatch & { code: string }) | null;
-  speak: (text: string, lang: string, onEnd?: () => void) => void;
+  speak: (text: string, lang: string, onEnd?: () => void, rate?: number) => void;
   pause: () => void;
   resume: () => void;
   stop: () => void;
@@ -36,7 +36,7 @@ export function useSpeech(): SpeechState {
     };
   }, []);
 
-  const speak = useCallback((text: string, lang: string, onEnd?: () => void) => {
+  const speak = useCallback((text: string, lang: string, onEnd?: () => void, rate?: number) => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
     const synth = window.speechSynthesis;
     synth.cancel();
@@ -59,7 +59,7 @@ export function useSpeech(): SpeechState {
       const u = new SpeechSynthesisUtterance(chunk.trim());
       u.lang = match.quality === "exact" || match.quality === "language" ? lang : (match.voice?.lang ?? lang);
       if (match.voice) u.voice = match.voice;
-      u.rate = 0.95;
+      u.rate = rate ?? 0.95;
       u.pitch = 1;
       if (i === 0)
         u.onstart = () => {
